@@ -1,0 +1,7 @@
+# folders
+node_modules/
+src/data/
+
+# files
+storageAccount.json
+.env

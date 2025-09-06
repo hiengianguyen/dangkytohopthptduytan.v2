@@ -1,0 +1,42 @@
+{
+  "name": "dangkytohop",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon --inspect src/index.js",
+    "restart": "npx kill-port 4001 && npm start",
+    "watch": "node-sass -w src/resources/scss/ -o src/public/css/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiengianguyen/DangKyToHop.git"
+  },
+  "keywords": [
+    "DKTH",
+    "DangKyToHop"
+  ],
+  "author": "Mason",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hiengianguyen/DangKyToHop/issues"
+  },
+  "homepage": "https://github.com/hiengianguyen/DangKyToHop#readme",
+  "description": "",
+  "dependencies": {
+    "bootstrap-datepicker": "^1.10.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-handlebars": "^8.0.1",
+    "firebase-admin": "^13.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "jsrmvi": "^1.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "node-sass": "^9.0.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3"
+  }
+}
