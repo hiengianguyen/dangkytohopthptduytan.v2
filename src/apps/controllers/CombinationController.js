@@ -395,9 +395,7 @@ class CombinationController {
 
     return res.json({
       isSuccess: true,
-      message: "Phê duyệt hồ sơ thành công!",
-      status: "Đã phê duyệt",
-      typeBadge: "success"
+      message: "Phê duyệt hồ sơ thành công!"
     });
   }
 
@@ -424,9 +422,7 @@ class CombinationController {
 
     return res.json({
       isSuccess: true,
-      message: "Huỷ phê duyệt hồ sơ thành công!",
-      status: "Không phê duyệt",
-      typeBadge: "danger"
+      message: "Huỷ phê duyệt hồ sơ thành công!"
     });
   }
 
