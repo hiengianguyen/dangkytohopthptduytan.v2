@@ -3,6 +3,7 @@ class RegisteredCombinationModel {
     this.id = data.id;
     this.numberMatriculation = data.numberMatriculation || "";
     this.fullName = data.fullName || "";
+    this.classId = data.classId || "";
     this.gender = data.gender || "";
     this.dayOfBirth = data.dayOfBirth || "";
     this.placeOfBirth = data.placeOfBirth || "";

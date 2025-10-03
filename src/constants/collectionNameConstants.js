@@ -1,6 +1,5 @@
 const CollectionNameConstant = {
   Users: "users",
-  HighSchools: "highSchools",
   SecondarySchools: "secondarySchools",
   Combinations: "combinations",
   SubmittedCombinations: "submittedCombinations",
@@ -11,7 +10,8 @@ const CollectionNameConstant = {
   FavouriteSubmitted: "favouriteSubmitted",
   ImageActivity: "imageActivity",
   Notification: "notification",
-  UserNotification: "userNotification"
+  UserNotification: "userNotification",
+  Classes: "classes"
 };
 
 module.exports = CollectionNameConstant;

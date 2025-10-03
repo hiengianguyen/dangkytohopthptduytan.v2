@@ -6,11 +6,11 @@ function filterSubmittedList(data, filter) {
 
   //filter combination 1,2.
   if (filter.combination1 === "Tất cả" && filter.combination2 !== "Tất cả") {
-    result = data.filter((doc, index) => {
+    result = data.filter((doc) => {
       return doc.combination2.includes(filter.combination2);
     });
   } else if (filter.combination2 === "Tất cả" && filter.combination1 !== "Tất cả") {
-    result = data.filter((doc, index) => {
+    result = data.filter((doc) => {
       return doc.combination1.includes(filter.combination1);
     });
   } else {
@@ -41,19 +41,19 @@ function filterSubmittedList(data, filter) {
   //filter Approve
   if (filter.status !== "Tất cả") {
     switch (filter.status) {
-      case "approved":
+      case "Đã phê duyệt":
         result = result.filter((doc) => {
-          return doc.status === filter.status;
+          return doc.status === "approved";
         });
         break;
-      case "reject":
+      case "Đã huỷ phê duyệt":
         result = result.filter((doc) => {
-          return doc.status === filter.status;
+          return doc.status === "rejected";
         });
         break;
       default:
         result = result.filter((doc) => {
-          return doc.status === filter.status;
+          return doc.status === "submitted";
         });
         break;
     }

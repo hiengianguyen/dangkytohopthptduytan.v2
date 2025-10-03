@@ -4,7 +4,9 @@ const HomeController = require("../controllers/HomeController");
 const CombinationController = require("../controllers/CombinationController");
 const SchoolController = require("../controllers/SchoolController");
 const FileController = require("../controllers/FileController");
+const MaintenanceController = require("../controllers/MaintenanceController");
 const NotificationController = require("../controllers/NotificationController");
+const ClassmateController = require("./ClassmateController");
 
 module.exports = {
   AuthController,
@@ -13,5 +15,7 @@ module.exports = {
   CombinationController,
   SchoolController,
   FileController,
-  NotificationController
+  MaintenanceController,
+  NotificationController,
+  ClassmateController
 };
