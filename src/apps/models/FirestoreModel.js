@@ -94,8 +94,9 @@ class FirestoreModel {
     try {
       const data = modelObject.toFirestore();
       const addedDoc = await this.collectionRef.add(data);
-      if (addedDoc) {
-        return true;
+      const afterDoc = await this.collectionRef.doc(addedDoc.id).get();
+      if (afterDoc) {
+        return afterDoc.data();
       } else {
         return false;
       }
@@ -121,8 +122,9 @@ class FirestoreModel {
   async updateItem(id, object) {
     try {
       const updatedDoc = await this.collectionRef.doc(id).update(object);
+      const afterDoc = await this.collectionRef.doc(id).get();
       if (updatedDoc && updatedDoc.writeTime) {
-        return true;
+        return afterDoc.data();
       } else {
         return false;
       }
