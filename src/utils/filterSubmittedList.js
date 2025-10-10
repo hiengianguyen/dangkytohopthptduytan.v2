@@ -39,8 +39,6 @@ function filterSubmittedList(data, filter, statusCheck) {
 
   //filter Approve
   if (statusCheck) {
-    console.log(statusCheck);
-
     if (filter.status !== "Tất cả") {
       switch (filter.status) {
         case "Đã phê duyệt":
