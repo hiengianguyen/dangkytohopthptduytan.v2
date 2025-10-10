@@ -361,6 +361,7 @@ class CombinationController {
     if (ok) {
       return res.json({
         isSuccess: true,
+        docAfter: { ...ok, id: combinationId },
         message: "Cập nhật thông tin tổ hợp thành công"
       });
     } else {
@@ -400,7 +401,7 @@ class CombinationController {
   }
 
   async submitedReject(req, res, next) {
-    const userId = req.body.userId;
+    const userId = req.params.id;
     const currTime = new Date();
     const docSubmited = await this.registeredCombinationsDbRef.getItemByFilter({
       userId: userId
@@ -427,12 +428,13 @@ class CombinationController {
   }
 
   async submitedSort(req, res, next) {
-    const { submittedList, ...filter } = req.body;
-    const finalData = filterSubmittedList(submittedList, filter);
+    const { submittedList, statusCheck, ...filter } = req.body;
+    const finalData = filterSubmittedList(submittedList, filter, statusCheck);
 
     return res.json({
       isSuccess: true,
-      submittedListAfterSort: finalData
+      submittedListAfterSort: finalData,
+      filter: filter
     });
   }
 }

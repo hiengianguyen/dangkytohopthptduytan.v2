@@ -1,9 +1,8 @@
 const { removeVI } = require("jsrmvi");
 const { convertVietnameseDatetimeToDate } = require("./convertVietnameseDatetimeToDate");
 
-function filterSubmittedList(data, filter) {
+function filterSubmittedList(data, filter, statusCheck) {
   let result;
-
   //filter combination 1,2.
   if (filter.combination1 === "Tất cả" && filter.combination2 !== "Tất cả") {
     result = data.filter((doc) => {
@@ -39,28 +38,32 @@ function filterSubmittedList(data, filter) {
   }
 
   //filter Approve
-  if (filter.status !== "Tất cả") {
-    switch (filter.status) {
-      case "Đã phê duyệt":
-        result = result.filter((doc) => {
-          return doc.status === "approved";
-        });
-        break;
-      case "Đã huỷ phê duyệt":
-        result = result.filter((doc) => {
-          return doc.status === "rejected";
-        });
-        break;
-      default:
-        result = result.filter((doc) => {
-          return doc.status === "submitted";
-        });
-        break;
-    }
-  }
+  if (statusCheck) {
+    console.log(statusCheck);
 
-  if (result.length === 0) {
-    return [];
+    if (filter.status !== "Tất cả") {
+      switch (filter.status) {
+        case "Đã phê duyệt":
+          result = result.filter((doc) => {
+            return doc.status === "approved";
+          });
+          break;
+        case "Đã huỷ phê duyệt":
+          result = result.filter((doc) => {
+            return doc.status === "rejected";
+          });
+          break;
+        default:
+          result = result.filter((doc) => {
+            return doc.status === "submitted";
+          });
+          break;
+      }
+    }
+
+    if (result.length === 0) {
+      return [];
+    }
   }
 
   //filter Name.
