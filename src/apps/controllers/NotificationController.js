@@ -106,75 +106,62 @@ class NotificationController {
   }
 
   async createNoti(req, res, next) {
-    if (req?.cookies?.isLogin === "true") {
-      const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
-      let typeNoti = type;
-      if (fileUrl) {
-        typeNoti = "file";
-      }
-      const currentTime = new Date();
-      const notificationModel = new NotificationModel(
-        null, //id
-        title,
-        message,
-        fileUrl,
-        typeNoti,
-        convertToVietnameseDateTime(currentTime),
-        null //isDeleted
-      );
+    const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
+    let typeNoti = type;
+    if (fileUrl) {
+      typeNoti = "file";
+    }
+    const currentTime = new Date();
+    const data = {
+      title: title,
+      message: message,
+      fileUrl: fileUrl,
+      type: type,
+      publishAt: convertToVietnameseDateTime(currentTime)
+    };
+    const notificationModel = new NotificationModel(data);
 
-      const response = await this.notiDBRef.addItem(notificationModel);
-      if (response) {
-        return res.json({
-          message: "Gữi thông báo thành công",
-          isSuccess: true
-        });
-      } else {
-        return res.json({
-          message: "Gữi thông báo không thành công",
-          isSuccess: false
-        });
-      }
+    const response = await this.notiDBRef.addItem(notificationModel);
+    if (response) {
+      return res.json({
+        message: "Gữi thông báo thành công",
+        isSuccess: true
+      });
     } else {
-      return res.redirect("/");
+      return res.json({
+        message: "Gữi thông báo không thành công",
+        isSuccess: false
+      });
     }
   }
 
   async updateNoti(req, res, next) {
-    if (req?.cookies?.isLogin === "true") {
-      const id = req?.params?.id;
-      const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
+    const id = req?.params?.id;
+    const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
 
-      let typeNoti = type;
-      if (fileUrl) {
-        typeNoti = "file";
-      }
+    let typeNoti = type;
+    if (fileUrl) {
+      typeNoti = "file";
+    }
 
-      const currentTime = new Date();
-
-      const response = await this.notiDBRef.updateItem(id, {
-        title: title,
-        message: message,
-        fileUrl: fileUrl,
-        type: typeNoti,
-        publishAt: convertToVietnameseDateTime(currentTime)
+    const currentTime = new Date();
+    const response = await this.notiDBRef.updateItem(id, {
+      title: title,
+      message: message,
+      fileUrl: fileUrl,
+      type: typeNoti,
+      publishAt: convertToVietnameseDateTime(currentTime)
+    });
+    if (response) {
+      return res.json({
+        message: "Cập nhật thông báo thành công",
+        id: id,
+        isSuccess: true
       });
-      if (response) {
-        return res.json({
-          message: "Cập nhật thông báo thành công",
-          id: id,
-          isSuccess: true
-        });
-      } else {
-        return res.json({
-          message: "Cập nhật thông báo không thành công",
-          isSuccess: false
-        });
-      }
     } else {
       return res.json({
-        isSuccess: false,
-        message: "Bạn chưa đăng nhập"
+        message: "Cập nhật thông báo không thành công",
+        isSuccess: false
       });
     }
   }

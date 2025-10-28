@@ -1,31 +1,27 @@
 const { UserConstant } = require("../../constants");
 
 class UserModel {
-  constructor(id, fullName, password, phone, avatar, role, isDeleted) {
-    this.id = id;
-    this.fullName = fullName;
-    this.password = password;
-    this.phone = phone;
-    this.avatar = avatar || UserConstant.DefaultAvatarUrl;
-    this.role = role || "student";
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.fullName = data.fullName || "";
+    this.password = data.password || "";
+    this.phone = data.phone || "";
+    this.avatar = data.avatar || UserConstant.DefaultAvatarUrl;
+    this.role = data.role || "student";
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new UserModel(doc.id, data.fullName, data.password, data.phone, data.avatar, data.role, data.isDeleted);
+    data.id = doc.id;
+    return new UserModel(data);
   }
 
   toFirestore() {
-    return {
-      fullName: this.fullName,
-      password: this.password,
-      phone: this.phone,
-      avatar: this.avatar,
-      role: this.role,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

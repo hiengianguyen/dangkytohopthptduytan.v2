@@ -1,40 +1,26 @@
 class CombinationModel {
-  constructor(id, name, description, classesCount, classesCapacity, compulsorySubjects, optionalSubjects, isDeleted) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
-    this.classesCount = classesCount;
-    this.classesCapacity = classesCapacity;
-    this.compulsorySubjects = compulsorySubjects;
-    this.optionalSubjects = optionalSubjects;
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.name = data.name || "";
+    this.description = data.description || "";
+    this.classesCount = data.classesCount || 0;
+    this.classesCapacity = data.classesCapacity || 0;
+    this.compulsorySubjects = data.compulsorySubjects || [];
+    this.optionalSubjects = data.optionalSubjects || [];
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new CombinationModel(
-      doc.id,
-      data.name,
-      data.description,
-      data.classesCount,
-      data.classesCapacity,
-      data.compulsorySubjects,
-      data.optionalSubjects,
-      data.isDeleted
-    );
+    data.id = doc.id;
+    return new CombinationModel(data);
   }
 
   toFirestore() {
-    return {
-      name: this.name,
-      description: this.description,
-      classesCount: this.classesCount,
-      classesCapacity: this.classesCapacity,
-      compulsorySubjects: this.compulsorySubjects,
-      optionalSubjects: this.optionalSubjects,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

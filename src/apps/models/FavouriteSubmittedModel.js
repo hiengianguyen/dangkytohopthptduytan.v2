@@ -1,23 +1,22 @@
 class FavouriteSubmittedModel {
-  constructor(id, userId, submittedId, isDeleted) {
-    this.id = id;
-    this.userId = userId;
-    this.submittedId = submittedId;
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.userId = data.userId || "";
+    this.submittedId = data.submittedId || "";
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new FavouriteSubmittedModel(doc.id, data.userId, data.submittedId, data.isDeleted);
+    data.id = doc.id;
+    return new FavouriteSubmittedModel(data);
   }
 
   toFirestore() {
-    return {
-      userId: this.userId,
-      submittedId: this.submittedId,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

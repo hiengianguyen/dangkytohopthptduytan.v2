@@ -14,6 +14,8 @@ class ClassmateController {
     this.deleteClass = this.deleteClass.bind(this);
     this.studentAddClass = this.studentAddClass.bind(this);
     this.classDetail = this.classDetail.bind(this);
+    this.classChange = this.classChange.bind(this);
+    this.deleteClassHadStudent = this.deleteClassHadStudent.bind(this);
   }
 
   async studentList(req, res, next) {
@@ -78,8 +80,7 @@ class ClassmateController {
   }
 
   async createClass(req, res, next) {
-    const { name, teacher, combination1, combination2 } = req.body;
-    const classModel = new ClassesModel(null, name, teacher, combination1, combination2, false);
+    const classModel = new ClassesModel(req.body);
     try {
       const doc = await this.classesDbRef.addItem(classModel);
       if (doc) {
@@ -152,6 +153,43 @@ class ClassmateController {
     }
   }
 
+  async deleteClassHadStudent(req, res, next) {
+    const { id } = req.body;
+
+    let students = await this.registeredCombinationsDbRef.getItemsByFilter({
+      classId: id,
+      isDeleted: false
+    });
+
+    students = students.map((item) => item.id);
+    try {
+      const [deleteClass, updateField] = await Promise.all(
+        this.classesDbRef.hardDeleteItem(id),
+        Promise.all(
+          students.map((item) =>
+            this.registeredCombinationsDbRef.updateItem(item, {
+              classId: ""
+            })
+          )
+        )
+      );
+      if (deleteClass && updateField) {
+        return res.json({
+          isSuccess: true
+        });
+      } else {
+        return res.json({
+          isSuccess: true
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        isSuccess: false
+      });
+    }
+  }
+
   async classDetail(req, res, next) {
     const id = req.params.id;
     const [classDetail, students] = await Promise.all([
@@ -173,6 +211,31 @@ class ClassmateController {
       isSuccess: true,
       studentListAfterSort: finalData
     });
+  }
+
+  async classChange(req, res, next) {
+    const { newClass, studentId } = req?.body;
+
+    const classFilter = await this.classesDbRef.getItemByFilter({
+      name: newClass,
+      isDeleted: false
+    });
+
+    const respon = await this.registeredCombinationsDbRef.updateItem(studentId, {
+      classId: classFilter.id
+    });
+
+    if (respon) {
+      return res.json({
+        isSuccess: true,
+        message: "Chuyển lớp thành công!"
+      });
+    } else {
+      return res.json({
+        isSuccess: false,
+        message: "Chuyển lớp không thành công!"
+      });
+    }
   }
 }
 

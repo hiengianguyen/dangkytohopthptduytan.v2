@@ -204,7 +204,11 @@ class CombinationController {
     if (docSubmitedSaved) {
       await this.favouriteSubmittedDbRef.updateItem(docSubmitedSaved.id, { isDeleted: false });
     } else {
-      const favouriteSubmittedModal = new FavouriteSubmittedModel(undefined, userId, docId, undefined);
+      const data = {
+        userId: userId,
+        submittedId: docId
+      };
+      const favouriteSubmittedModal = new FavouriteSubmittedModel(data);
       await this.favouriteSubmittedDbRef.addItem(favouriteSubmittedModal);
     }
 
@@ -235,7 +239,7 @@ class CombinationController {
       isDeleted: false
     });
 
-    if (allDocSubmittedSaved) {
+    if (allDocSubmittedSaved.length) {
       allDocSubmittedSaved = await Promise.all(
         allDocSubmittedSaved.map((docSaved) => this.registeredCombinationsDbRef.getItemById(docSaved.submittedId))
       );
@@ -311,14 +315,6 @@ class CombinationController {
         }
       }
 
-      const combinationsInfo = combinations.map((combinationName, index) => {
-        return {
-          name: combinationName,
-          countCombinaton1: countCombinaton1[index],
-          countCombinaton2: countCombinaton2[index]
-        };
-      });
-
       classesCapacitys = classesCapacitys.map((max, i) => max - countCombinaton1[i]);
 
       return res.json({
@@ -378,13 +374,12 @@ class CombinationController {
     const docSubmited = await this.registeredCombinationsDbRef.getItemByFilter({
       userId: userId
     });
-    const userNotificationModel = new UserNotificationModel(
-      null, //id
-      userId,
-      "omtURp0ycFYGKXDx5Mgm",
-      convertToVietnameseDateTime(currTime),
-      null //isDeleted
-    );
+    const data = {
+      userId: userId,
+      notificationId: "omtURp0ycFYGKXDx5Mgm",
+      publishAt: convertToVietnameseDateTime(currTime)
+    };
+    const userNotificationModel = new UserNotificationModel(data);
     const submittedId = docSubmited.id;
 
     await Promise.all([
