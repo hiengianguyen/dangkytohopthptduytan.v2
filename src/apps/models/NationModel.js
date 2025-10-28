@@ -1,21 +1,21 @@
 class NationModel {
-  constructor(id, name, isDeleted) {
-    this.id = id;
-    this.name = name;
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.name = data.name || "";
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new NationModel(doc.id, data.name, data.isDeleted);
+    data.id = doc.id;
+    return new NationModel(data);
   }
 
   toFirestore() {
-    return {
-      name: this.name,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

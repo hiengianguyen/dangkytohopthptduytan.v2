@@ -4,6 +4,7 @@ const router = express.Router();
 
 router.get("/excel/submited-list", FileController.exportSubmitedListExcel);
 router.post("/excel/filter-submited-list", FileController.exportSubmitedListFilterExcel);
+router.post("/excel/class-detail", FileController.exportClassListExcel);
 router.get("/pdf/submited/:userId", FileController.exportSubmitedPDF);
 
 module.exports = router;

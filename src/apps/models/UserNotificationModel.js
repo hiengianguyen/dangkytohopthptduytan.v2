@@ -1,25 +1,23 @@
 class UserNotificationModel {
-  constructor(id, userId, notificationId, publishAt, isDeleted) {
-    this.id = id;
-    this.userId = userId;
-    this.notificationId = notificationId;
-    this.publishAt = publishAt;
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.userId = data.userId || "";
+    this.notificationId = data.notificationId || "";
+    this.publishAt = data.publishAt;
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new UserNotificationModel(doc.id, data.userId, data.notificationId, data.publishAt, data.isDeleted);
+    data.id = doc.id;
+    return new UserNotificationModel(data);
   }
 
   toFirestore() {
-    return {
-      userId: this.userId,
-      notificationId: this.notificationId,
-      publishAt: this.publishAt,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

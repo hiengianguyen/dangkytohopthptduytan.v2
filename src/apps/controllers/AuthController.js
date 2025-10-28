@@ -51,7 +51,12 @@ class AuthController {
         isSuccess: false
       });
     } else {
-      const userModel = new UserModel(undefined, capitalizeFirstLetter(fullName), password, phone, undefined, undefined, undefined);
+      const data = {
+        fullName: capitalizeFirstLetter(fullName),
+        password: password,
+        phone: phone
+      };
+      const userModel = new UserModel(data);
       await this.userDbRef.addItem(userModel);
       return res.json({
         message: "Tạo tài khoản thành công",

@@ -1,6 +1,6 @@
 class RegisteredCombinationModel {
   constructor(data = {}) {
-    this.id = data.id;
+    this.id = data.id || null;
     this.numberMatriculation = data.numberMatriculation || "";
     this.fullName = data.fullName || "";
     this.classId = data.classId || "";
@@ -60,7 +60,9 @@ class RegisteredCombinationModel {
   }
 
   toFirestore() {
-    return { ...this };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 

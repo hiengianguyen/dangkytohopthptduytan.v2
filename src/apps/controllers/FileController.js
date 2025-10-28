@@ -3,6 +3,7 @@ const { CollectionNameConstant } = require("../../constants");
 const { generateJWT } = require("../../utils/generateJWT");
 const { exportExcelFile } = require("../../utils/exportFile");
 const http = require("https");
+const { exportExcelFileClass } = require("../../utils/exportFileClass");
 require("dotenv").config();
 
 class FileController {
@@ -121,6 +122,29 @@ class FileController {
       };
     });
     const buffer = exportExcelFile(rows, keys);
+    return res.send(buffer);
+  }
+
+  async exportClassListExcel(req, res, next) {
+    const { submittedList } = req?.body;
+
+    const keys = ["STT", "Họ tên học sinh", "Giới tính", "Ngày tháng năm sinh", "empty", "empty", "Nơi sinh", "Dân tộc", "Điểm"];
+
+    const rows = submittedList.map((row, index) => {
+      const date = row.dayOfBirth.split("-");
+      return {
+        index: index + 1,
+        fullName: row.fullName,
+        gender: row.gender,
+        day: date[2],
+        month: date[1],
+        year: date[0],
+        placeOfBirth: row.placeOfBirth,
+        nation: row.nation,
+        point: Number(row.englishPoint) + Number(row.literaturePoint) + Number(row.mathPoint)
+      };
+    });
+    const buffer = exportExcelFileClass(rows, keys);
     return res.send(buffer);
   }
 

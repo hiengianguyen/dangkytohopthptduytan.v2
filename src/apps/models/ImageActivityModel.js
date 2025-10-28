@@ -1,25 +1,23 @@
 class ImageActivityModel {
-  constructor(id, description, imgUrl, type, isDeleted) {
-    this.id = id;
-    this.description = description;
-    this.imgUrl = imgUrl;
-    this.type = type;
-    this.isDeleted = isDeleted || false;
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.description = data.description || "";
+    this.imgUrl = data.imgUrl || "";
+    this.type = data.type || "";
+    this.isDeleted = data.isDeleted || false;
   }
 
   fromFirestore(doc) {
     if (!doc.exists) return null;
     const data = doc.data();
-    return new ImageActivityModel(doc.id, data.description, data.imgUrl, data.type, data.isDeleted);
+    data.id = doc.id;
+    return new ImageActivityModel(data);
   }
 
   toFirestore() {
-    return {
-      description: this.description,
-      imgUrl: this.imgUrl,
-      type: this.type,
-      isDeleted: this.isDeleted
-    };
+    const obj = { ...this };
+    delete obj.id;
+    return obj;
   }
 }
 
