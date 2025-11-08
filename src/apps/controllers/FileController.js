@@ -149,17 +149,11 @@ class FileController {
   }
 
   async exportSubmitedPDF(req, res, next) {
-    const userId = req?.params?.userId ?? req?.cookies?.userId;
+    const userId = req?.params?.userId || req?.cookies?.userId;
+    const templateId = req?.query?.template;
     const data = await this.registeredCombinationsDbRef.getItemByFilter({
       userId: userId
     });
-
-    const registeredAt = data.registeredAt;
-    const registeredDay = registeredAt.split(" ")[1];
-    const [day, month, year] = registeredDay.split("/");
-    data.registeredDay = day;
-    data.registeredMonth = month;
-    data.registeredYear = year;
 
     const options = {
       method: "POST",
@@ -173,7 +167,7 @@ class FileController {
     };
 
     let PDFUrl;
-    const require = http.request(options, function (response) {
+    const reqPDF = http.request(options, function (response) {
       const chunks = [];
 
       response.on("data", function (chunk) {
@@ -192,11 +186,11 @@ class FileController {
       });
     });
 
-    require.write(
+    reqPDF.write(
       JSON.stringify({
         template: {
-          id: process.env.GENERATOR_PDF_TEMPLATE_ID,
-          data: data
+          id: templateId,
+          data: [data]
         },
         format: "pdf",
         output: "url",
@@ -204,7 +198,7 @@ class FileController {
       })
     );
 
-    require.end();
+    reqPDF.end();
   }
 }
 

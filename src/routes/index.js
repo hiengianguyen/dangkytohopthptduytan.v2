@@ -10,8 +10,6 @@ const fileRouter = require("./fileRoute");
 const classmateRoute = require("./classmateRoute");
 const notiRouter = require("./notiRoute");
 
-// Mount sub-routers. These will be mounted under whatever path this router
-// is attached to (for example `app.use('/api', router)` -> `/api/auth`).
 router.use("/", homeRouter);
 router.use("/me", meRouter);
 router.use("/notification", notiRouter);
