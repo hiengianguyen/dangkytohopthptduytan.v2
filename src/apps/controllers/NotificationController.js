@@ -8,7 +8,6 @@ class NotificationController {
     this.userNotificationDbRef = new FirestoreModel(CollectionNameConstant.UserNotification, UserNotificationModel);
     this.index = this.index.bind(this);
     this.notiDetail = this.notiDetail.bind(this);
-    this.userNotiDelete = this.userNotiDelete.bind(this);
     this.notiDelete = this.notiDelete.bind(this);
     this.createNoti = this.createNoti.bind(this);
     this.notiEdit = this.notiEdit.bind(this);
@@ -17,14 +16,25 @@ class NotificationController {
 
   async index(req, res, next) {
     if (req?.cookies?.isLogin === "true") {
-      const notifications = await this.notiDBRef.getAllItems({
-        fieldName: "publishAt",
-        type: "desc"
-      });
+      const userId = req?.cookies?.userId;
+      let [notifications, notiSubmittedStatus] = await Promise.all([
+        this.notiDBRef.getAllItems({
+          fieldName: "publishAt",
+          type: "desc"
+        }),
+        this.userNotificationDbRef.getItemByFilter({ userId: userId })
+      ]);
+      const publishAt = notiSubmittedStatus?.publishAt;
+
+      notiSubmittedStatus = await this.notiDBRef.getItemById(notiSubmittedStatus?.notificationId || "");
+      if (notiSubmittedStatus) {
+        notiSubmittedStatus.publishAt = publishAt;
+      }
 
       return res.json({
         isSuccess: true,
-        notifications: notifications,
+        notiSubmittedStatus: notiSubmittedStatus,
+        notifications: [...notifications],
         role: req?.cookies?.role
       });
     } else {
@@ -66,18 +76,6 @@ class NotificationController {
         isSuccess: false,
         message: "Bạn chưa đăng nhập"
       });
-    }
-  }
-
-  async userNotiDelete(req, res, next) {
-    if (req?.cookies?.isLogin === "true") {
-      const userId = req?.params?.id;
-      const userNotiId = req?.query?.notiId;
-      await this.userNotificationDbRef.hardDeleteItem(userNotiId);
-      res.locals.quantityNoti = res.locals.quantityNoti - 1;
-      return res.redirect(`/combination/submited-detail/${userId}`);
-    } else {
-      return res.redirect("/");
     }
   }
 
