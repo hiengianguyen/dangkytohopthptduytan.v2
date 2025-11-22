@@ -13,6 +13,7 @@ const { convertToVietnameseDateTime } = require("../../utils/convertToVietnamese
 const { convertVietnameseDatetimeToDate } = require("../../utils/convertVietnameseDatetimeToDate");
 const { uploadImageToCloudinary } = require("../../utils/uploadImageToCloudinary");
 const { filterSubmittedList } = require("../../utils/filterSubmittedList");
+const { checkCombinationAndCount } = require("../../utils/checkCombinationAndCount");
 
 class CombinationController {
   constructor() {
@@ -57,7 +58,7 @@ class CombinationController {
           userId: data.userId
         });
         if (submitedByUserId) {
-          await this.registeredCombinationsDbRef.updateItem(submitedByUserId.id, submitedCombinationModel.toFirestore());
+          await this.registeredCombinationsDbRef.updateItem(submitedByUserId.id, {...submitedCombinationModel.toFirestore(), isEdited: true});
           return res.json({
             message: "Cập nhật thông tin đăng ký vào lớp 10 thành công.",
             userId: data.userId
@@ -113,7 +114,7 @@ class CombinationController {
 
   async submitedDetail(req, res, next) {
     if (req?.cookies?.isLogin === "true" && req?.params?.userId) {
-      const userId = req?.params?.userId;
+      const userId = req?.params?.userId || req?.cookies?.userId;
       const data = await this.registeredCombinationsDbRef.getItemByFilter({
         userId: userId
       });
@@ -123,7 +124,7 @@ class CombinationController {
         typeBadge: ""
       };
 
-      switch (data.status) {
+      switch (data?.status) {
         case "approved":
           badge.status = "Đã phê duyệt";
           badge.typeBadge = "success";
@@ -266,36 +267,15 @@ class CombinationController {
 
   async chart(req, res, next) {
     if (req?.cookies?.isLogin === "true" && req?.cookies?.userId) {
-      function checkCombinationAndCount(combinationNumber, arr) {
-        switch (combinationNumber) {
-          case "1":
-            arr[0] = arr[0] + 1;
-            break;
-          case "2":
-            arr[1] = arr[1] + 1;
-            break;
-          case "3":
-            arr[2] = arr[2] + 1;
-            break;
-          case "4":
-            arr[3] = arr[3] + 1;
-            break;
-          case "5":
-            arr[4] = arr[4] + 1;
-            break;
-          case "6":
-            arr[5] = arr[5] + 1;
-            break;
-        }
-      }
-
+      let length;
       const countCombinaton1 = [0, 0, 0, 0, 0, 0];
       const countCombinaton2 = [0, 0, 0, 0, 0, 0];
       let [data, combinations] = await Promise.all([this.registeredCombinationsDbRef.getAllItems(), this.combinationDbRef.getAllItems()]);
+      length = data.length;
       combinations.sort((a, b) => (a.name > b.name ? 1 : -1));
       let classesCapacitys = combinations.map((combination) => combination.classesCapacity);
       combinations = combinations.map((combination) => combination.name);
-      data = data.forEach((submit) => {
+      data.forEach((submit) => {
         const combinationNubber1 = submit.combination1.split(" ")[2];
         const combinationNubber2 = submit.combination2.split(" ")[2];
         checkCombinationAndCount(combinationNubber1, countCombinaton1);
@@ -320,14 +300,77 @@ class CombinationController {
           mostChooseOfCombination2.combination = `Tổ hợp ${i + 1}`;
         }
       }
+      const classesCapacitysSubmitted = classesCapacitys.map((max, i) => max - countCombinaton1[i]);
+      const submittedGoal = classesCapacitys.reduce((a, b) => a+b, 0);
 
-      classesCapacitys = classesCapacitys.map((max, i) => max - countCombinaton1[i]);
+      let submitted = [];
+      let approved = [];
+      let isEdited = [];
+      let gender = [];
+      let schoolCount = {};
+      let otherSchool = 0;
+      let pointCount = {
+        '< 15': 0,
+        '15-18': 0, 
+        '18-21': 0, 
+        '21-24': 0,
+        '24-27': 0,
+        '> 27': 0
+      };
+      let maxPoint = 0;
+      let sumPoint = 0;
+
+      for (const item of data) {
+        if (item.status === 'submitted') submitted.push(item);
+        if (item.status === 'approved') approved.push(item);
+        if (item.isEdited) isEdited.push(item);
+        if (item.gender === 'Nam') gender.push(item);
+        const school = item.secondarySchool;
+        if(!schoolCount[school]) schoolCount[school] = 0;
+        schoolCount[school]++;
+        const totalPoint = Number(item.mathPoint) + Number(item.literaturePoint) + Number(item.englishPoint);
+        sumPoint += totalPoint;
+        if(totalPoint < 15) {
+          if(!pointCount['< 15']) pointCount['< 15'] = 0;
+          pointCount['< 15']++;
+        } else if(totalPoint >= 15 && totalPoint <=18) {
+          if(!pointCount['15-18']) pointCount['15-18'] = 0;
+          pointCount['15-18']++;
+        } else if(totalPoint >= 18 && totalPoint <=21) {
+          if(!pointCount['18-21']) pointCount['18-21'] = 0;
+          pointCount['18-21']++;
+        } else if(totalPoint >= 21 && totalPoint <=24) {
+          if(!pointCount['21-24']) pointCount['21-24'] = 0;
+          pointCount['21-24']++;
+        } else if(totalPoint >= 24 && totalPoint <=27) {
+          if(!pointCount['24-27']) pointCount['24-27'] = 0;
+          pointCount['24-27']++;
+        } else {
+          if(!pointCount['> 27']) pointCount['> 27'] = 0;
+          pointCount['> 27']++;
+        }
+      }   
+      schoolCount = Object.entries(schoolCount).sort((a,b) => b[1] - a[1]).slice(0,4) || [];
+      schoolCount.forEach((item) => otherSchool += item[1]);
+      pointCount = Object.entries(pointCount);
+      pointCount.forEach((item) => item[1] > maxPoint ? maxPoint = item[1] : maxPoint)
 
       return res.json({
         isSuccess: true,
+        length: length,
+        submittedGoal: submittedGoal,
+        approvedLength: approved.length,
+        submittedLength: submitted.length,
+        isEdited: isEdited.length,
+        maleGender: gender.length,
+        schoolCount: schoolCount,
+        otherSchool: length - otherSchool,
+        pointCount: pointCount,
+        maxPoint: maxPoint,
+        avgPoint: (sumPoint/length).toFixed(1),
         countCombinaton1: countCombinaton1,
         countCombinaton2: countCombinaton2,
-        classesCapacitys: classesCapacitys,
+        classesCapacitys: classesCapacitysSubmitted,
         mostChooseOfCombination1: mostChooseOfCombination1,
         mostChooseOfCombination2: mostChooseOfCombination2,
         combinations: combinations

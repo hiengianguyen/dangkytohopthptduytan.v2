@@ -47,8 +47,12 @@ class RegisteredCombinationModel {
     this.sick = data.sick || [];
     this.typeStudent = data.typeStudent || [];
     this.isDeleted = data.isDeleted || false;
+    this.isEdited = data.isEdited || false;
     this.status = data.status || "submitted";
     this.userId = data.userId || "";
+    this.registerPlace = data.registerPlace || "";
+    this.signatureParents = data.signatureParents || "";
+    this.signatureStudent = data.signatureStudent || "";
     this.registeredAt = data.registeredAt || new Date();
   }
 
