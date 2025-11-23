@@ -155,6 +155,20 @@ class FileController {
       userId: userId
     });
 
+    const totlaPoint = Number(data.englishPoint) + Number(data.literaturePoint) + Number(data.mathPoint);
+    const combination1 = data.combination1.split(" ")[2];
+    const combination2 = data.combination2.split(" ")[2];
+    const t = {
+      a: data?.typeStudent?.includes("Con liệt sĩ"),
+      b: data?.typeStudent?.includes("Con thương binh, bệnh binh từ 81% trở lên"),
+      c: data?.typeStudent?.includes("Con dân tộc thiểu số"),
+      d: data?.typeStudent?.includes("Con thương binh, bệnh binh dưới 81%"),
+      e: data?.typeStudent?.includes("Con Anh hùng LLVT"),
+      f: data?.sick?.includes("Bệnh ngoài da"),
+      g: data?.sick?.includes("Bệnh tim mạch"),
+      h: data?.sick?.includes("Bệnh hô hấp")
+    };
+
     const options = {
       method: "POST",
       hostname: "us1.pdfgeneratorapi.com",
@@ -190,7 +204,7 @@ class FileController {
       JSON.stringify({
         template: {
           id: templateId,
-          data: [data]
+          data: [{ ...data, total: totlaPoint, combination1, combination2, ...t }]
         },
         format: "pdf",
         output: "url",
