@@ -17,6 +17,7 @@ class NotificationController {
   async index(req, res, next) {
     if (req?.cookies?.isLogin === "true") {
       const userId = req?.cookies?.userId;
+      const role = req.query.role;
       let [notifications, notiSubmittedStatus] = await Promise.all([
         this.notiDBRef.getAllItems({
           fieldName: "publishAt",
@@ -26,15 +27,18 @@ class NotificationController {
       ]);
       const publishAt = notiSubmittedStatus?.publishAt;
 
-      notiSubmittedStatus = await this.notiDBRef.getItemById(notiSubmittedStatus?.notificationId || "");
-      if (notiSubmittedStatus) {
-        notiSubmittedStatus.publishAt = publishAt;
+      if (notiSubmittedStatus?.notificationId && role !== "manager") {
+        notiSubmittedStatus = await this.notiDBRef.getItemById(notiSubmittedStatus.notificationId);
+        if (notiSubmittedStatus) {
+          notiSubmittedStatus.publishAt = publishAt;
+        }
+      } else {
+        notiSubmittedStatus = {};
       }
-
       return res.json({
         isSuccess: true,
         notiSubmittedStatus: notiSubmittedStatus,
-        notifications: [...notifications],
+        notifications: notifications,
         role: req?.cookies?.role
       });
     } else {
@@ -104,25 +108,38 @@ class NotificationController {
   }
 
   async createNoti(req, res, next) {
-    const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
-    let typeNoti = type;
+    const {
+      title = "",
+      subTitle = "",
+      message = "",
+      fileUrl = "",
+      type = "text",
+      typeNoti = "Tuyển sinh",
+      registeredBy = "Admin hệ thống"
+    } = req.body;
+
+    let typeNotification = type;
     if (fileUrl) {
-      typeNoti = "file";
+      typeNotification = "file";
     }
+
     const currentTime = new Date();
     const data = {
       title: title,
+      subTitle: subTitle,
       message: message,
       fileUrl: fileUrl,
-      type: type,
+      type: typeNotification,
+      typeNoti: typeNoti,
+      registeredBy: registeredBy,
       publishAt: convertToVietnameseDateTime(currentTime)
     };
     const notificationModel = new NotificationModel(data);
-
     const response = await this.notiDBRef.addItem(notificationModel);
     if (response) {
       return res.json({
         message: "Gữi thông báo thành công",
+        id: response.id,
         isSuccess: true
       });
     } else {
@@ -135,19 +152,30 @@ class NotificationController {
 
   async updateNoti(req, res, next) {
     const id = req?.params?.id;
-    const { title = null, message = null, fileUrl = null, type = "text" } = req.body;
+    const {
+      title = "",
+      subTitle = "",
+      message = "",
+      fileUrl = "",
+      type = "text",
+      typeNoti = "Tuyển sinh",
+      registeredBy = "Admin hệ thống"
+    } = req.body;
 
-    let typeNoti = type;
+    let typeNotification = type;
     if (fileUrl) {
-      typeNoti = "file";
+      typeNotification = "file";
     }
 
     const currentTime = new Date();
     const response = await this.notiDBRef.updateItem(id, {
       title: title,
       message: message,
+      subTitle: subTitle,
       fileUrl: fileUrl,
-      type: typeNoti,
+      type: typeNotification,
+      typeNoti: typeNoti,
+      registeredBy: registeredBy,
       publishAt: convertToVietnameseDateTime(currentTime)
     });
     if (response) {
