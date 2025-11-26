@@ -58,7 +58,10 @@ class CombinationController {
           userId: data.userId
         });
         if (submitedByUserId) {
-          await this.registeredCombinationsDbRef.updateItem(submitedByUserId.id, {...submitedCombinationModel.toFirestore(), isEdited: true});
+          await this.registeredCombinationsDbRef.updateItem(submitedByUserId.id, {
+            ...submitedCombinationModel.toFirestore(),
+            isEdited: true
+          });
           return res.json({
             message: "Cập nhật thông tin đăng ký vào lớp 10 thành công.",
             userId: data.userId
@@ -268,8 +271,8 @@ class CombinationController {
   async chart(req, res, next) {
     if (req?.cookies?.isLogin === "true" && req?.cookies?.userId) {
       let length;
-      const countCombinaton1 = [0, 0, 0, 0, 0, 0];
-      const countCombinaton2 = [0, 0, 0, 0, 0, 0];
+      const countCombinaton1 = [0, 0, 0, 0, 0];
+      const countCombinaton2 = [0, 0, 0, 0, 0];
       let [data, combinations] = await Promise.all([this.registeredCombinationsDbRef.getAllItems(), this.combinationDbRef.getAllItems()]);
       length = data.length;
       combinations.sort((a, b) => (a.name > b.name ? 1 : -1));
@@ -301,7 +304,7 @@ class CombinationController {
         }
       }
       const classesCapacitysSubmitted = classesCapacitys.map((max, i) => max - countCombinaton1[i]);
-      const submittedGoal = classesCapacitys.reduce((a, b) => a+b, 0);
+      const submittedGoal = classesCapacitys.reduce((a, b) => a + b, 0);
 
       let submitted = [];
       let approved = [];
@@ -310,50 +313,53 @@ class CombinationController {
       let schoolCount = {};
       let otherSchool = 0;
       let pointCount = {
-        '< 15': 0,
-        '15-18': 0, 
-        '18-21': 0, 
-        '21-24': 0,
-        '24-27': 0,
-        '> 27': 0
+        "< 15": 0,
+        "15-18": 0,
+        "18-21": 0,
+        "21-24": 0,
+        "24-27": 0,
+        "> 27": 0
       };
       let maxPoint = 0;
       let sumPoint = 0;
 
       for (const item of data) {
-        if (item.status === 'submitted') submitted.push(item);
-        if (item.status === 'approved') approved.push(item);
+        if (item.status === "submitted") submitted.push(item);
+        if (item.status === "approved") approved.push(item);
         if (item.isEdited) isEdited.push(item);
-        if (item.gender === 'Nam') gender.push(item);
+        if (item.gender === "Nam") gender.push(item);
         const school = item.secondarySchool;
-        if(!schoolCount[school]) schoolCount[school] = 0;
+        if (!schoolCount[school]) schoolCount[school] = 0;
         schoolCount[school]++;
         const totalPoint = Number(item.mathPoint) + Number(item.literaturePoint) + Number(item.englishPoint);
         sumPoint += totalPoint;
-        if(totalPoint < 15) {
-          if(!pointCount['< 15']) pointCount['< 15'] = 0;
-          pointCount['< 15']++;
-        } else if(totalPoint >= 15 && totalPoint <=18) {
-          if(!pointCount['15-18']) pointCount['15-18'] = 0;
-          pointCount['15-18']++;
-        } else if(totalPoint >= 18 && totalPoint <=21) {
-          if(!pointCount['18-21']) pointCount['18-21'] = 0;
-          pointCount['18-21']++;
-        } else if(totalPoint >= 21 && totalPoint <=24) {
-          if(!pointCount['21-24']) pointCount['21-24'] = 0;
-          pointCount['21-24']++;
-        } else if(totalPoint >= 24 && totalPoint <=27) {
-          if(!pointCount['24-27']) pointCount['24-27'] = 0;
-          pointCount['24-27']++;
+        if (totalPoint < 15) {
+          if (!pointCount["< 15"]) pointCount["< 15"] = 0;
+          pointCount["< 15"]++;
+        } else if (totalPoint >= 15 && totalPoint <= 18) {
+          if (!pointCount["15-18"]) pointCount["15-18"] = 0;
+          pointCount["15-18"]++;
+        } else if (totalPoint >= 18 && totalPoint <= 21) {
+          if (!pointCount["18-21"]) pointCount["18-21"] = 0;
+          pointCount["18-21"]++;
+        } else if (totalPoint >= 21 && totalPoint <= 24) {
+          if (!pointCount["21-24"]) pointCount["21-24"] = 0;
+          pointCount["21-24"]++;
+        } else if (totalPoint >= 24 && totalPoint <= 27) {
+          if (!pointCount["24-27"]) pointCount["24-27"] = 0;
+          pointCount["24-27"]++;
         } else {
-          if(!pointCount['> 27']) pointCount['> 27'] = 0;
-          pointCount['> 27']++;
+          if (!pointCount["> 27"]) pointCount["> 27"] = 0;
+          pointCount["> 27"]++;
         }
-      }   
-      schoolCount = Object.entries(schoolCount).sort((a,b) => b[1] - a[1]).slice(0,4) || [];
-      schoolCount.forEach((item) => otherSchool += item[1]);
+      }
+      schoolCount =
+        Object.entries(schoolCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4) || [];
+      schoolCount.forEach((item) => (otherSchool += item[1]));
       pointCount = Object.entries(pointCount);
-      pointCount.forEach((item) => item[1] > maxPoint ? maxPoint = item[1] : maxPoint)
+      pointCount.forEach((item) => (item[1] > maxPoint ? (maxPoint = item[1]) : maxPoint));
 
       return res.json({
         isSuccess: true,
@@ -367,7 +373,7 @@ class CombinationController {
         otherSchool: length - otherSchool,
         pointCount: pointCount,
         maxPoint: maxPoint,
-        avgPoint: (sumPoint/length).toFixed(1),
+        avgPoint: (sumPoint / length).toFixed(1),
         countCombinaton1: countCombinaton1,
         countCombinaton2: countCombinaton2,
         classesCapacitys: classesCapacitysSubmitted,
@@ -387,9 +393,15 @@ class CombinationController {
     if (req?.cookies?.isLogin === "true" && req?.cookies?.userId) {
       const combinations = await this.combinationDbRef.getAllItems();
       combinations.sort((a, b) => (a.name > b.name ? 1 : -1));
+      const combinationLength = combinations.length;
+      const classesCapacitys = combinations.reduce((a, b) => a + b.classesCapacity, 0);
+      const classCount = combinations.reduce((a, b) => a + Number(b.classesCount), 0);
       return res.json({
         isSuccess: true,
-        combinations: combinations
+        combinationLength: combinationLength,
+        classesCapacitys: classesCapacitys,
+        combinations: combinations,
+        classCount: classCount
       });
     } else {
       return res.json({ isSuccess: false });
