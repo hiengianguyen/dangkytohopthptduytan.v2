@@ -484,8 +484,8 @@ class CombinationController {
   }
 
   async submitedSort(req, res, next) {
-    const { submittedList, statusCheck, ...filter } = req.body;
-    const finalData = filterSubmittedList(submittedList, filter, statusCheck);
+    const { submittedList, ...filter } = req.body;
+    const finalData = filterSubmittedList(submittedList, filter);
 
     return res.json({
       isSuccess: true,
